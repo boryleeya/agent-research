@@ -11,7 +11,7 @@ import {
 import { InMemoryChatMessageHistory } from "@langchain/core/chat_history";
 import { v4 as uuidv4 } from "uuid";
 
-const summaryLlm = createLLM({ temperature: 0 });
+const summaryllm = createLLM({ temperature: 0 });
 
 const sessionId = uuidv4();
 
@@ -33,13 +33,16 @@ const chatPrompt = ChatPromptTemplate.fromMessages([
 
 // 摘要生成
 async function buildSummary(messages) {
-  const content = messages
-    .map((m) => `${m._getType()}: ${m.content}`)
-    .join("\n");
+  const content = messages.map((m) => `${m.content}`).join("\n");
+
   const sumPrompt = `将以下对话精炼总结，保留关键信息，200字以内：
 ${content}`;
-  const res = await summaryLlm.invoke([new SystemMessage(sumPrompt)]);
-  return res.content;
+  const res = await summaryllm.invoke(sumPrompt);
+  console.log("==buildSummary==", res);
+
+  return typeof res.content === "string"
+    ? res.content
+    : JSON.stringify(res.content);
 }
 
 /**
@@ -49,7 +52,7 @@ ${content}`;
  */
 const contextMiddleware = RunnableLambda.from(async (payload) => {
   const { input, history } = payload;
-  const keepRecentCount = 4; // 保留最近4条完整消息（2轮问答）
+  const keepRecentCount = 1; // 保留最近3轮会话6条完整消息（2轮问答）
 
   let workingHistory = [...history];
   // 需要压缩
@@ -60,10 +63,15 @@ const contextMiddleware = RunnableLambda.from(async (payload) => {
     );
     const recent = workingHistory.slice(-keepRecentCount);
     const summaryText = await buildSummary(toSummary);
-    workingHistory = [
-      new SystemMessage(`【历史对话摘要】：${summaryText}`),
-      ...recent,
-    ];
+    console.log(`【历史对话摘要】：${summaryText.trim()}`);
+    if (summaryText && summaryText.trim()) {
+      workingHistory = [
+        new SystemMessage(`【历史对话摘要】：${summaryText.trim()}`),
+        ...recent,
+      ];
+    } else {
+      workingHistory = [...recent];
+    }
   }
 
   // 渲染完整消息
@@ -79,7 +87,13 @@ const contextMiddleware = RunnableLambda.from(async (payload) => {
     strategy: "first",
     keepFirstMessage: true,
   });
-  return trimmed;
+  return trimmed.filter((msg) => {
+    const text =
+      typeof msg.content === "string"
+        ? msg.content
+        : JSON.stringify(msg.content);
+    return text.trim() !== "";
+  });
 });
 
 // 基础链路
@@ -96,7 +110,6 @@ const chatChain = new RunnableWithMessageHistory({
 
 // 测试
 async function run() {
-  const sessionId = "test_001";
   const qs = [
     "我叫小明，25岁，深圳Java后端3年",
     "想转型AI开发，Python弱，Java熟练",
