@@ -15,5 +15,6 @@ class WeatherTool extends StructuredTool {
     }
     call(input) {
         const { city, unit } = input
+        
     }
 }
