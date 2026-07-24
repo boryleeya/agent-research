@@ -70,15 +70,15 @@ const run = async () => {
     "帮我总结下我的技术栈",
     "我之前说我叫什么名字？",
   ];
-  for(const input of conversations) {
-    console.log(`\n用户：${input}`)
-    const context = await memory.getContext(input)
-    const response = await chain.invoke({ context, input })
-    const content = response.content
-    console.log(`助手：${content}`)
-    memory.addToBuffer(input, content)
+  for (const input of conversations) {
+    console.log(`\n用户：${input}`);
+    const context = await memory.getContext(input);
+    const response = await chain.invoke({ context, input });
+    const content = response.content;
+    console.log(`助手：${content}`);
+    memory.addToBuffer(input, content);
   }
 };
 run().catch(() => {
-    console.log('失败')
-})
+  console.log("失败");
+});
