@@ -55,6 +55,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
 });
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
+    console.log('CallToolRequestSchema:', JSON.stringify(request.params))
     switch (request.params.name) {
         case "getCityCode": {
             const { keywords } = request.params.arguments;

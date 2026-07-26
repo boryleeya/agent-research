@@ -10,6 +10,9 @@ const client = new MultiServerMCPClient({
         transport: "stdio",
         command: "node",
         args: ["D:/agent-research/src/mcp/server.js"],
+        "env": {
+            apiKey: process.env.AMAP_API_KEY
+        }
     }
 });
 
@@ -21,6 +24,6 @@ const agent = createAgent({
 });
 
 const weatherResponse = await agent.invoke({
-    messages: [{ role: "human", content: "杭州的城市编码是多少?获取杭州天气？" }],
+    messages: [{ role: "human", content: "获取杭州天气？" }],
 });
 console.log('===weatherResponse===\n\n', weatherResponse.messages.pop().content)
