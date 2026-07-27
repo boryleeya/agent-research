@@ -9,13 +9,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "devEngines": {
-    "packageManager": {
-      "name": "pnpm",
-      "version": "^11.15.1",
-      "onFail": "download"
-    }
-  },
   "type": "module",
   "dependencies": {
     "@amap/amap-maps-mcp-server": "^0.0.8",
@@ -38,5 +31,9 @@
     "mongodb": "^7.5.0",
     "uuid": "^14.0.1",
     "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "^11.16.0",
+    "mermaid-cli": "^0.2.4"
   }
 }
